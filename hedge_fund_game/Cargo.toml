@@ -1,0 +1,12 @@
+[package]
+name = "hedge_fund_game"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+reference_data = {path = "../reference_data"}
+tokio = {version = "1", features = ["full"]}
+reqwest = {version = "0.11", features = ["json"]}
+market_data = {path = "../market_data"}

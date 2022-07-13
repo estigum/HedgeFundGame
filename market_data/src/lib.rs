@@ -1,5 +1,4 @@
-pub mod hedge_fund;
-pub mod portfolio;
+pub mod coinbase;
 
 #[cfg(test)]
 mod tests {
