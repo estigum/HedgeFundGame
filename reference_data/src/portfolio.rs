@@ -36,6 +36,10 @@ impl Portfolio {
         }
     }
 
+    pub fn get_hedge_fund_id(&self) -> i32 {
+        self.hedge_fund_id
+    }
+
     pub fn add_postion(&mut self, position : Position) -> Result<bool, &'static str>
     {
         if !self.positions.contains_key(position.get_currency()) {
@@ -64,6 +68,19 @@ impl Portfolio {
                     }
                 }
                 return Ok(true);
+            }
+        }
+        else {
+            match transaction.get_side() {
+                Side::Buy => {
+                    let position = Position::new(transaction.get_symbol().to_string(), transaction.get_quantity());
+                    let result = self.add_postion(position);
+                    match result {
+                        Ok(value) => return Ok(value),
+                        Err(e) => return Err(e)
+                    }        
+                }
+                Side::Sell => return Err("Must have position to do sell transaction")
             }
         }
         Err("Not able to get postion")
@@ -119,6 +136,30 @@ fn test_add_buy_transaction() {
 }
 
 #[test]
+fn test_add_buy_transaction_no_position() {
+    let mut portfolio = Portfolio::new(21);
+    let transaction = Transaction::new(21, String::from("USD"), Side::Buy, 200000.0, 1.0);
+    let result = portfolio.add_transaction(&transaction);
+    match result {
+        Ok(val) => assert_eq!(val, true),
+        Err(_) => panic!("This test case did not work")
+    }
+    let currency = String::from("USD");
+    assert_eq!(portfolio.get_position(&currency), Some(200000.0));  
+}
+
+#[test]
+fn test_add_sell_transaction_no_position() {
+    let mut portfolio = Portfolio::new(21);
+    let transaction = Transaction::new(21, String::from("USD"), Side::Sell, 200000.0, 1.0);
+    let result = portfolio.add_transaction(&transaction);
+    match result {
+        Ok(val) => panic!("This test case did not work"),
+        Err(e) =>  assert_eq!(e, "Must have position to do sell transaction")
+    }
+}
+
+#[test]
 fn test_add_sell_transaction() {
     let position = Position::new(String::from("USD"), 1000000.0);
     let mut portfolio = Portfolio::new(21);
@@ -132,6 +173,7 @@ fn test_add_sell_transaction() {
     let currency = String::from("USD");
     assert_eq!(portfolio.get_position(&currency), Some(800000.0));  
 }
+
 #[test]
 fn test_add_sell_transactions_not_enough_quantity() {
     let position = Position::new(String::from("USD"), 1000000.0);

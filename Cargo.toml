@@ -1,2 +1,2 @@
 [workspace]
-members = ["reference_data", "hedge_fund_game", "market_data"]
+members = ["reference_data", "hedge_fund_game", "market_data","portfolio_manager"]
