@@ -16,10 +16,16 @@ impl PortfolioManager {
             portfolios : HashMap::new(),
         }
     }
-    pub fn add_new_hedge_fund(&mut self, name : String, address : String, phone_number : String){
-        self.latest_hedge_fund_id += 1;
-        let hedge_fund = HedgeFund::new(self.latest_hedge_fund_id, name.clone(), address.clone(), phone_number.clone());
-        self.hedge_funds.insert(self.latest_hedge_fund_id, hedge_fund);
+    pub fn add_new_hedge_fund(&mut self, name : String, address : String, phone_number : String) ->Result<bool, &'static str>{
+        if let Some(hedge_fund_id) = self.get_hedge_fund_id(&name) {
+            Err("A hedge fund for name exist")
+        }
+        else {
+            self.latest_hedge_fund_id += 1;
+            let hedge_fund = HedgeFund::new(self.latest_hedge_fund_id, name.clone(), address.clone(), phone_number.clone());
+            self.hedge_funds.insert(self.latest_hedge_fund_id, hedge_fund);
+            Ok(true)    
+        }
     }
 
     pub fn get_hedge_fund(&self, hedge_fund_id : i32) -> Result<&HedgeFund, &'static str> {
@@ -54,6 +60,7 @@ impl PortfolioManager {
             Ok(true)
         }
     }
+
 }
 
 #[test]
@@ -67,6 +74,18 @@ fn test_adding_hedge_fund()
            assert_eq!(hedge_fund.get_name(),"Stigum Investments");         
         },
         Err(_) => panic!("Error running case")
+    }
+}
+
+#[test]
+fn test_adding_hedge_fund_twice()
+{
+    let mut portfolio_manager = PortfolioManager::new();
+    portfolio_manager.add_new_hedge_fund(String::from("Stigum Investments"), String::from("381 Rock Road"), String::from("631-219-3849"));
+    let result = portfolio_manager.add_new_hedge_fund(String::from("Stigum Investments"), String::from("381 Rock Road"), String::from("631-219-3849"));
+    match  result {
+        Ok(_) => panic!("Error running case"),
+        Err(e) => assert_eq!(e,"A hedge fund for name exist")
     }
 }
 
