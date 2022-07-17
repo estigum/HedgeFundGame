@@ -18,6 +18,31 @@ async fn main() ->Result<(), reqwest::Error> {
     if let Some(price) = get_price(&btc).await {
         println!("{} price is {}", btc, price);
     }
+    loop {
+        let mut line = String::new();
+        println!("Enter currency pair (Example BTC-USD) or Exit:");
+        let bytes = std::io::stdin().read_line(&mut line).unwrap();
+        let len = line.len();
+        line.truncate(len-2);
+        if line.eq("Exit") {
+            break;
+        }
+        println!("You want to get a price for {}", line);
+
+        if let Some(price) = get_price(&line).await {
+            println!("{} price is {}", line, price);
+        }        
+    }
+    let result = coinbase::get_products().await;
+    match result {
+        Ok(products) => {
+            println!("Got Products");
+            for product in &products {
+                println!("Product Id is {}", product.id);
+            }
+            }
+        Err(e) => println!("Error getting products: {}", e)
+        }
     Ok(())
 }
 

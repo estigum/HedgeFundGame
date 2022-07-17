@@ -10,6 +10,31 @@ pub struct CoinbaseCurrency {
 pub struct CoinBase {
     data : CoinbaseCurrency,
 }
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CoinBaseData {
+    data : Vec<CoinBaseProducts>
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CoinBaseProducts {
+    pub id : String,
+    base_currency : String,
+    quote_currency : String,
+    quote_increment : String,
+    base_increment : String,
+    display_name : String,
+    min_market_funds : String,
+    margin_enabled : bool,
+    post_only : bool,
+    limit_only : bool,
+    cancel_only : bool,
+    status : String,
+    status_message : String,
+    trading_disabled : bool,
+    fx_stablecoin : bool,
+    max_slippage_percentage : String,
+    auction_mode : bool,
+}
 
 impl CoinBase {
     pub fn get_base(&self) -> &str {
@@ -28,6 +53,18 @@ pub async fn get_currencypair(currency_pair : &str) -> Result<CoinBase, reqwest:
     let url = format!("https://api.coinbase.com/v2/prices/{}/spot", currency_pair);
     let data : CoinBase = reqwest::Client::new()
     .get(url)
+    .send()
+    .await?
+    .json()
+    .await?;
+    Ok(data)
+}
+
+pub async fn get_products() ->Result<Vec<CoinBaseProducts>, reqwest::Error> {
+    let url = format!("https://api.exchange.coinbase.com/products");
+    let data : Vec<CoinBaseProducts> = reqwest::Client::new()
+    .get("https://api.exchange.coinbase.com/products")
+    .header("User-Agent","application/json")
     .send()
     .await?
     .json()
